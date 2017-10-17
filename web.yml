@@ -1,0 +1,59 @@
+---
+- hosts: webservers
+  become: yes
+  tasks:
+    - name: Ensure Apache installed
+      apt: name=apache2 state=present
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure Apache installed
+      yum: name=apache2 state=present
+      when: ansible_os_family == "RedHat"
+
+    - name: Creates directory
+      file: path=/var/www/html/ansible state=directory
+
+
+    - name: Deploy webpage to path=/var/www/html/ansible
+      copy: src=index.html dest=/var/www/html/ mode=0644
+      notify:
+          - apache restart
+
+#    - name: Ensure Apache is running
+#      service: name=apache2 enabled=yes state=started
+
+    - name: flush all temporary rules
+      service: name=apache2 enabled=yes state=started
+#############
+#    - shell: date
+#      register: user
+
+#    - debug: msg=username:"{{user.stdout}}"
+
+#    - command: touch /tmp/file10
+
+#   - file: 
+#       path: /tmp/file10 
+#       owner: {{ username }} 
+#        mode: 0664
+################ 
+    - shell: whoami
+      register: username
+    - debug: var=username
+    - file:
+       path: /tmp/text.txt
+       owner: "{{username.stdout}}"
+
+
+ #   - name: Allow port 80/http access from anywhere
+  #    iptables:
+
+   #     action: insert
+    #    chain: INPUT
+  handlers:
+    - name: apache restart
+      service:
+        name: apache2
+        state: restarted
+
+                                                                             
